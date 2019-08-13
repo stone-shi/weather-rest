@@ -12,8 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class Station {
 
 
-    @Autowired
-    StationLink stationLink;
+    private final StationLink stationLink;
+
+    public Station(StationLink stationLink) {
+        this.stationLink = stationLink;
+    }
 
     @GetMapping("/v1/station/info")
     public StationInfo checkStationInfo() throws StationException {

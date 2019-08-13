@@ -6,7 +6,7 @@ import com.shifamily.dev.weather.domain.StationInfo;
 import com.shifamily.dev.weather.exception.StationException;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -14,75 +14,90 @@ import java.net.Socket;
 
 @Service
 @Slf4j
-public class VantageLinkIP implements StationLink {
+public class MonitorIILink implements StationLink  {
+
+    @Value("${cachetimems:1000}")
+    private int cacheTime;
+
+    private final VantageLinkProperties vantageLinkProperties;
+    private Socket socket = null;
 
     private static final char ACK = 6;
     private static final char NO_ACK = 33;
 
-    @Autowired
-    private VantageLinkProperties vantageLinkProperties;
+    private StationData cachedStationData = null;
 
-    private Socket socket = null;
 
-    @Synchronized
+    private DataInputStream  input ;
+    private DataOutputStream out ;
+
+
+    public MonitorIILink(VantageLinkProperties vantageLinkProperties) {
+        this.vantageLinkProperties = vantageLinkProperties;
+    }
+
     private void connect() throws IOException {
         String address = vantageLinkProperties.getIp();
         int port = vantageLinkProperties.getPort();
         socket = new Socket(address, port);
+        input  = new DataInputStream(socket.getInputStream());
+        out    = new DataOutputStream(socket.getOutputStream());
 
     }
 
-    @Synchronized
     private void disconnect() throws IOException {
+        input.close();
+        out.close();
         socket.close();
         socket = null;
     }
 
-    @Synchronized
-    private char[] sendCommand(char[] cmd, int outLenExpected) throws IOException, StationException {
-        BufferedReader input ;
-        PrintWriter out ;
+    private byte[] sendCommand(byte[] cmd, int outLenExpected) throws IOException, StationException {
 
-        input  = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out    = new PrintWriter(socket.getOutputStream(), true);
         out.write(cmd);
         out.flush();
-        char[] ack = new char[1];
-        int rd = input.read(ack);
-        if (rd != 1 || ack[0] == NO_ACK)
+        int ack = input.read();
+        if (ack == NO_ACK)
             throw new StationException("CMD is not a valid command");
 
-        if (ack[0] != ACK)
+        if (ack != ACK)
             throw new StationException("Unknown protocol detected, first response is not ACK (0x06)");
 
-        char[] buf = new char[outLenExpected];
+        byte[] buf = new byte[outLenExpected];
         int ct = 0;
         while (ct < outLenExpected){
-            rd = input.read(buf, ct, outLenExpected - ct);
+            int rd = input.read(buf, ct, outLenExpected - ct);
             if (rd <= 0)
                 break;
             ct += rd;
         }
-
-        char[] res = new char[ct];
+        byte[] res = new byte[ct];
         System.arraycopy(buf, 0, res, 0, ct);
         return res;
 
     }
 
     @Override
+    @Synchronized
     public StationInfo ping() throws StationException {
         return getStationInfo();
     }
 
     @Override
+    @Synchronized
     public StationData getStationDataLive()  throws StationException {
+        if (cachedStationData != null && cacheTime > 0
+                && System.currentTimeMillis() -  cachedStationData.getTimeStamp() < cacheTime )
+            return cachedStationData;
+
+
         try {
             connect();
-            char[] cmd = {'L', 'O', 'O', 'P', ' ', '1', 13};
-            char[] rs = sendCommand(cmd, 99);
+            byte[] cmd = {'L', 'O', 'O', 'P',(byte)0xff, (byte)0xff, 13};
+            byte[] rs = sendCommand(cmd, 18);
             disconnect();
-            return new StationData(rs);
+            cachedStationData = new  StationData(rs);
+            return cachedStationData;
 
         } catch (IOException e) {
             log.error("IO Error while getStationDataLive", e);
@@ -92,11 +107,12 @@ public class VantageLinkIP implements StationLink {
     }
 
     @Override
+    @Synchronized
     public StationInfo getStationInfo() throws StationException {
         try {
             connect();
-            char[] cmd = {'W', 'R', 'D', 18, 77, 13};
-            char[] rs = sendCommand(cmd, 1);
+            byte[] cmd = {'W', 'R', 'D', 18, 77, 13};
+            byte[] rs = sendCommand(cmd, 1);
             disconnect();
 
             if (rs[0] != 16 && rs[0] > 6 )
@@ -112,4 +128,5 @@ public class VantageLinkIP implements StationLink {
             throw new StationException("IO Error while getStationInfo()");
         }
     }
+
 }

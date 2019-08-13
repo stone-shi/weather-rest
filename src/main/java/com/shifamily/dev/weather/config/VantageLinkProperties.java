@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "station.vantage")
+@ConfigurationProperties(prefix = "station.davis")
 @Data
 public class VantageLinkProperties {
     private String mode;
