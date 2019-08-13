@@ -11,8 +11,8 @@ import java.util.Date;
 public class StationData {
 
     private int barometer;
-    private int insideTemperature;
-    private int outsideTemperature;
+    private double insideTemperature;
+    private double outsideTemperature;
     private int insideHumidity;
     private int outsideHumidity;
     private int windSpeed;
@@ -38,8 +38,8 @@ public class StationData {
 
         if (data[0] != 1)
             throw new StationException("LOOP package doesn't contain header");
-        insideTemperature = twoBytesToInt(data, 1);
-        outsideTemperature = twoBytesToInt(data, 3);
+        insideTemperature = twoBytesToInt(data, 1) / 10.0;
+        outsideTemperature = twoBytesToInt(data, 3) / 10.0;
         windSpeed = data[5];
         windDirection =  twoBytesToInt(data, 6);
         barometer = twoBytesToInt(data, 8);

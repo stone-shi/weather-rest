@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Weather Station</title>
+    <style type="text/css">
+        .tg  {border-collapse:collapse;border-spacing:0;border-color:#9ABAD9;}
+        .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#9ABAD9;color:#444;background-color:#EBF5FF;}
+        .tg .tg-head{font-weight:bold;font-family:Arial, Helvetica, sans-serif !important;;text-align:left;vertical-align:top;background-color:#D2E4FC;}
+        .tg .tg-value{text-align:left;vertical-align:top}
+    </style>
+
+
+    <script src="webjars/jquery/jquery.min.js"></script>
+    <script type="text/javascript">
+        function getStatus(){
+            console.log('calling data service()')
+            $.getJSON( "/v1/station/data", function( data )
+            {
+                console.log( data)
+                $('#insideTemp').html(data.insideTemperature);
+                $('#outsideTemp').html(data.outsideTemperature);
+                $('#insideHumidity').html(data.insideHumidity);
+                $('#outsideHumidity').html(data.outsideHumidity);
+                $('#windDirection').html(data.windDirection);
+                $('#windSpeed').html(data.windSpeed);
+                $('#rainRate').html(data.rainRate);
+                $('#date').html(data.date);
+            });
+        }
+        $(document).ready(function(){
+            getStatus();
+        })
+
+        setInterval(function() {
+            getStatus();
+        }, 1000 * 15);
+    </script>
+</head>
+<body>
+<table class="tg">
+    <tr>
+        <td class="tg-head">Inside Temp</td>
+        <td class="tg-value" id="insideTemp"></td>
+    </tr>
+    <tr>
+        <td class="tg-head">Outside Temp</td>
+        <td class="tg-value" id="outsideTemp"></td>
+    </tr>
+    <tr>
+        <td class="tg-head">Inside Humidity</td>
+        <td class="tg-value" id="insideHumidity"></td>
+    </tr>
+    <tr>
+        <td class="tg-head">Outside Humidity</td>
+        <td class="tg-value" id="outsideHumidity"></td>
+    </tr>
+    <tr>
+        <td class="tg-head">Wind Direction</td>
+        <td class="tg-value" id="windDirection"></td>
+    </tr>
+    <tr>
+        <td class="tg-head">Wind Speed</td>
+        <td class="tg-value" id="windSpeed"></td>
+    </tr>
+    <tr>
+        <td class="tg-head">Rain</td>
+        <td class="tg-value" id="rainRate"></td>
+    </tr>
+    <tr>
+        <td class="tg-head">Date</td>
+        <td class="tg-value" id="date"></td>
+    </tr>
+
+</table>
+
+
+</body>
+</html>
