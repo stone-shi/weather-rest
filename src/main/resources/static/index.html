@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Weather Station</title>
+
     <style type="text/css">
         .tg  {border-collapse:collapse;border-spacing:0;border-color:#9ABAD9;}
         .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#9ABAD9;color:#444;background-color:#EBF5FF;}
-        .tg .tg-head{font-weight:bold;font-family:Arial, Helvetica, sans-serif !important;;text-align:left;vertical-align:top;background-color:#D2E4FC;}
-        .tg .tg-value{text-align:left;vertical-align:top}
+        .tg .tg-head{font-weight:bold;font-family:Arial, Helvetica, sans-serif !important;;text-align:left;vertical-align:middle;background-color:#D2E4FC;}
+        .tg .tg-value{text-align:left;vertical-align:middle}
     </style>
 
 
@@ -26,6 +27,7 @@
                 $('#windSpeed').html(data.windSpeed);
                 $('#rainRate').html(data.rainRate);
                 $('#date').html(data.date);
+                $("#wind_dir").attr("src","second.jpg");
             });
         }
         $(document).ready(function(){
@@ -38,37 +40,38 @@
     </script>
 </head>
 <body>
+<div id="container"></div>
 <table class="tg">
     <tr>
-        <td class="tg-head">Inside Temp</td>
+        <td class="tg-head"><img src="images/temp2.svg">&nbsp;&nbsp;Inside Temp</td>
         <td class="tg-value" id="insideTemp"></td>
     </tr>
     <tr>
-        <td class="tg-head">Outside Temp</td>
+        <td class="tg-head"><img src="images/temp1.svg">&nbsp;&nbsp;Outside Temp</td>
         <td class="tg-value" id="outsideTemp"></td>
     </tr>
     <tr>
-        <td class="tg-head">Inside Humidity</td>
+        <td class="tg-head"><img src="images/hum1.svg">&nbsp;&nbsp;Inside Humidity</td>
         <td class="tg-value" id="insideHumidity"></td>
     </tr>
     <tr>
-        <td class="tg-head">Outside Humidity</td>
+        <td class="tg-head"><img src="images/hum2.svg">&nbsp;&nbsp;Outside Humidity</td>
         <td class="tg-value" id="outsideHumidity"></td>
     </tr>
     <tr>
-        <td class="tg-head">Wind Direction</td>
+        <td class="tg-head"><img id="wind_dir" src="images/d-n.svg">&nbsp;&nbsp;Wind Direction</td>
         <td class="tg-value" id="windDirection"></td>
     </tr>
     <tr>
-        <td class="tg-head">Wind Speed</td>
+        <td class="tg-head"><img src="images/wind.svg">&nbsp;&nbsp;Wind Speed</td>
         <td class="tg-value" id="windSpeed"></td>
     </tr>
     <tr>
-        <td class="tg-head">Rain</td>
+        <td class="tg-head"><img src="images/rain.svg">&nbsp;&nbsp;Rain</td>
         <td class="tg-value" id="rainRate"></td>
     </tr>
     <tr>
-        <td class="tg-head">Date</td>
+        <td class="tg-head"><img src="images/date.svg">&nbsp;&nbsp;Date</td>
         <td class="tg-value" id="date"></td>
     </tr>
 
