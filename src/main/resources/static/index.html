@@ -19,15 +19,28 @@
             $.getJSON( "/v1/station/data", function( data )
             {
                 console.log( data)
-                $('#insideTemp').html(data.insideTemperature);
-                $('#outsideTemp').html(data.outsideTemperature);
+                $('#insideTemp').html(data.insideTemperature + "&#176; F");
+                $('#outsideTemp').html(data.outsideTemperature + "&#176; F");
                 $('#insideHumidity').html(data.insideHumidity);
                 $('#outsideHumidity').html(data.outsideHumidity);
-                $('#windDirection').html(data.windDirection);
-                $('#windSpeed').html(data.windSpeed);
+                $('#windSpeed').html(data.windSpeed + " mph");
                 $('#rainRate').html(data.rainRate);
                 $('#date').html(data.date);
-                $("#wind_dir").attr("src","second.jpg");
+
+                var dg = data.windDirection + 22.5 ;
+                if (dg > 360)
+                    dg = dg - 360;
+                dg = dg / 45;
+                var idx = parseInt(dg, 10);
+                var direction = ["N", "NE", "E", "SE", "S",
+                    "SW", "W", "NW" ];
+
+                var icons = ["images/d-n.svg", "images/d-ne.svg", "images/d-e.svg", "images/d-se.svg", "images/d-s.svg",
+                    "images/d-sw.svg", "images/d-w.svg", "images/d-nw.svg" ];
+
+                $("#wind_dir").attr("src",icons[idx]);
+                $('#windDirection').html(data.windDirection + "&#176; " + direction[idx]) ;
+
             });
         }
         $(document).ready(function(){
