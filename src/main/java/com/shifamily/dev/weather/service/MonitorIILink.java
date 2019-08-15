@@ -6,6 +6,7 @@ import com.shifamily.dev.weather.domain.StationInfo;
 import com.shifamily.dev.weather.exception.StationException;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -33,16 +34,18 @@ public class MonitorIILink implements StationLink  {
 
 
     public MonitorIILink(VantageLinkProperties vantageLinkProperties) {
+        log.info("Monitor II Link with configure: {} ", vantageLinkProperties );
         this.vantageLinkProperties = vantageLinkProperties;
     }
 
     private void connect() throws IOException {
+        log.info("Connecting to {} ...",  vantageLinkProperties.getIp());
         String address = vantageLinkProperties.getIp();
         int port = vantageLinkProperties.getPort();
         socket = new Socket(address, port);
         input  = new DataInputStream(socket.getInputStream());
         out    = new DataOutputStream(socket.getOutputStream());
-
+        log.info("Connected");
     }
 
     private void disconnect() throws IOException {
@@ -50,18 +53,23 @@ public class MonitorIILink implements StationLink  {
         out.close();
         socket.close();
         socket = null;
+        log.info("Disconnected");
     }
 
     private byte[] sendCommand(byte[] cmd, int outLenExpected) throws IOException, StationException {
-
+        log.debug("sendCommand() : {}", Hex.encodeHexString(cmd));
         out.write(cmd);
         out.flush();
         int ack = input.read();
-        if (ack == NO_ACK)
+        if (ack == NO_ACK) {
+            log.warn("Invalid command {} detected. Station return NO_ACK",  Hex.encodeHexString(cmd));
             throw new StationException("CMD is not a valid command");
+        }
 
-        if (ack != ACK)
+        if (ack != ACK) {
+            log.warn("Invalid response [{}] detected. Station return neither NO_ACK nor ACK", ack);
             throw new StationException("Unknown protocol detected, first response is not ACK (0x06)");
+        }
 
         byte[] buf = new byte[outLenExpected];
         int ct = 0;
@@ -73,6 +81,7 @@ public class MonitorIILink implements StationLink  {
         }
         byte[] res = new byte[ct];
         System.arraycopy(buf, 0, res, 0, ct);
+        log.debug("Got response {} bytes : [{}]", ct, Hex.encodeHexString(buf));
         return res;
 
     }
@@ -80,12 +89,14 @@ public class MonitorIILink implements StationLink  {
     @Override
     @Synchronized
     public StationInfo ping() throws StationException {
+        log.info("Ping command");
         return getStationInfo();
     }
 
     @Override
     @Synchronized
     public StationData getStationDataLive()  throws StationException {
+        log.info("Get LOOP data command");
         if (cachedStationData != null && cacheTime > 0
                 && System.currentTimeMillis() -  cachedStationData.getTimeStamp() < cacheTime )
             return cachedStationData;
@@ -109,6 +120,7 @@ public class MonitorIILink implements StationLink  {
     @Override
     @Synchronized
     public StationInfo getStationInfo() throws StationException {
+        log.info("Get station info command");
         try {
             connect();
             byte[] cmd = {'W', 'R', 'D', 18, 77, 13};
