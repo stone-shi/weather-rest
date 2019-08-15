@@ -16,7 +16,7 @@
     <script type="text/javascript">
         function getStatus(){
             console.log('calling data service()')
-            $.getJSON( "/v1/station/data", function( data )
+            $.getJSON( "v1/station/data", function( data )
             {
                 console.log( data)
                 $('#insideTemp').html(data.insideTemperature + "&#176; F");
