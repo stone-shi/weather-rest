@@ -4,7 +4,6 @@ import com.shifamily.dev.weather.domain.StationData;
 import com.shifamily.dev.weather.domain.StationInfo;
 import com.shifamily.dev.weather.exception.StationException;
 import com.shifamily.dev.weather.service.StationLink;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 

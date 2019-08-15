@@ -1,13 +1,15 @@
 plugins {
     id 'org.springframework.boot' version '2.1.7.RELEASE'
     id 'java'
+    id "io.spring.dependency-management" version "1.0.8.RELEASE"
+    id "com.gorylenko.gradle-git-properties" version "2.1.0"
+    id 'com.github.ksoichiro.build.info' version '0.2.0'
+    id "com.palantir.docker" version "0.22.1"
 }
 
-apply plugin: 'io.spring.dependency-management'
-
 group = 'com.shifamily.dev'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
+version = "${version}"
 
 configurations {
     compileOnly {
@@ -22,10 +24,32 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+
     compile("org.webjars:webjars-locator-core")
     compile("org.webjars:jquery:3.1.0")
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+springBoot {
+    buildInfo {
+        properties {
+            additional = [
+                    'buildeNumber': "${BUILDNUMBER}"
+            ]
+        }
+    }
+}
+
+docker {
+    dependsOn build
+    if (project.hasProperty("repo_uri")) {
+        name "${repo_uri}"
+    } else {
+        name "${project.group}/${bootJar.baseName}"
+    }
+    files bootJar.archivePath, 'entrypoint.sh'
+    buildArgs(['JAR_FILE': "${bootJar.archiveName}"])
 }
